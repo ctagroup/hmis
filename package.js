@@ -11,13 +11,13 @@ Package.describe(
 );
 
 Package.onUse(function(api) {
-	api.use('oauth2', ['client', 'server']);
-	api.use('oauth', ['client', 'server']);
-	api.use('http', ['server']);
-	api.use('templating', 'client');
-	api.use('underscore', 'server');
-	api.use('random', 'client');
-	api.use('service-configuration', ['client', 'server']);
+	api.use('oauth2@1.1.7', ['client', 'server']);
+	api.use('oauth@1.1.8', ['client', 'server']);
+	api.use('http@1.1.3', ['server']);
+	api.use('templating@1.1.7', 'client');
+	api.use('underscore@1.0.6', 'server');
+	api.use('random@1.0.7', 'client');
+	api.use('service-configuration@1.0.7', ['client', 'server']);
 
 	api.export('HMIS');
 
