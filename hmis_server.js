@@ -3,19 +3,12 @@
  */
 HMIS = {};
 
-var querystring = Npm.require('querystring');
-
 OAuth.registerService('HMIS', 2, null, function(query) {
 
 	var response = getTokenResponse(query);
 	var accessToken = response.accessToken;
 
-	// include all fields from hmis
-	// http://developers.hmis.com/docs/reference/login/public-profile-and-friend-list/
-	var whitelisted = ['id', 'email', 'name', 'first_name',
-	                   'last_name', 'link', 'gender', 'locale', 'age_range'];
-
-	var identity = getIdentity(accessToken, whitelisted);
+	// var identity = getIdentity(accessToken, whitelisted);
 
 	var serviceData = {
 		accessToken: accessToken,
@@ -23,12 +16,12 @@ OAuth.registerService('HMIS', 2, null, function(query) {
 	};
 
 
-	var fields = _.pick(identity, whitelisted);
-	_.extend(serviceData, fields);
+	// var fields = _.pick(identity, whitelisted);
+	// _.extend(serviceData, fields);
 
 	return {
 		serviceData: serviceData,
-		options: {profile: {name: identity.name}}
+		options: {profile: {name: "User Name"}}
 	};
 });
 
@@ -53,13 +46,19 @@ var getTokenResponse = function (query) {
 	var responseContent;
 	try {
 		// Request an access token
-		responseContent = HTTP.get(
-			"https://graph.hmis.com/v2.2/oauth/access_token", {
-				params: {
-					client_id: config.appId,
-					redirect_uri: OAuth._redirectUri('HMIS', config),
-					client_secret: OAuth.openSecret(config.secret),
-					code: query.code
+		responseContent = HTTP.post(
+			config.hmisAPIEndpoints.oauthBaseUrl + config.hmisAPIEndpoints.token +
+			"?grant_type=authorization_code" +
+			"&code=" + query["close?code"] +
+			"&redirect_uri=" + OAuth._redirectUri('HMIS', config), {
+				headers: {
+					"X-HMIS-TrustedApp-Id": config.appId,
+					"Authorization": new Buffer(config.appId+":"+config.appSecret || '').toString('base64'),
+					"Accept": "application/json",
+					"Content-Type": "application/json"
+				},
+				npmRequestOptions: {
+					rejectUnauthorized: false // TODO remove when deploy
 				}
 			}).content;
 	} catch (err) {
@@ -69,33 +68,44 @@ var getTokenResponse = function (query) {
 
 	// If 'responseContent' parses as JSON, it is an error.
 	// XXX which hmis error causes this behvaior?
-	if (isJSON(responseContent)) {
+	if (!isJSON(responseContent)) {
 		throw new Error("Failed to complete OAuth handshake with HMIS. " + responseContent);
 	}
 
 	// Success!  Extract the hmis access token and expiration
 	// time from the response
-	var parsedResponse = querystring.parse(responseContent);
-	var fbAccessToken = parsedResponse.access_token;
-	var fbExpires = parsedResponse.expires;
+	var parsedResponse = JSON.parse(responseContent);
+	console.log(parsedResponse);
+	var hmisAccessToken = parsedResponse.oAuthAuthorization.accessToken;
+	var hmisExpires = parsedResponse.oAuthAuthorization.expiresIn;
 
-	if (!fbAccessToken) {
+	if (!hmisAccessToken) {
 		throw new Error("Failed to complete OAuth handshake with hmis " +
 		                "-- can't find access token in HTTP response. " + responseContent);
 	}
 	return {
-		accessToken: fbAccessToken,
-		expiresIn: fbExpires
+		accessToken: hmisAccessToken,
+		expiresIn: hmisExpires
 	};
 };
 
 var getIdentity = function (accessToken, fields) {
+	var config = ServiceConfiguration.configurations.findOne({service: 'HMIS'});
+	if (!config)
+		throw new ServiceConfiguration.ConfigError();
+
 	try {
-		return HTTP.get("https://graph.hmis.com/v2.4/me", {
-			params: {
-				access_token: accessToken,
-				fields: fields
-			}
+		return HTTP.get(
+			config.hmisAPIEndpoints.userServiceBaseUrl + config.hmisAPIEndpoints.selfBasicInfo, {
+				headers: {
+					"X-HMIS-TrustedApp-Id": config.appId,
+					"Authorization": "HMISUserAuth session_token="+accessToken,
+					"Accept": "application/json",
+					"Content-Type": "application/json"
+				},
+				npmRequestOptions: {
+					rejectUnauthorized: false // TODO remove when deploy
+				}
 		}).data;
 	} catch (err) {
 		throw _.extend(new Error("Failed to fetch identity from HMIS. " + err.message),
@@ -104,5 +114,8 @@ var getIdentity = function (accessToken, fields) {
 };
 
 HMIS.retrieveCredential = function(credentialToken, credentialSecret) {
+	console.log("hmis::retrieveCredential");
+	console.log(credentialToken);
+	console.log(credentialSecret);
 	return OAuth.retrieveCredential(credentialToken, credentialSecret);
 };
