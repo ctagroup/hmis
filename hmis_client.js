@@ -33,11 +33,7 @@ HMIS.requestCredential = function (options, credentialRequestCompleteCallback) {
 		scope = options.requestPermissions.join(',');
 
 	var loginStyle = OAuth._loginStyle('HMIS', config, options);
-	// http://localhost:3000/
-	// ?code=9D057723C76142219E7B529BF625BDCE
-	// &state=eyJsb2dpblN0eWxlIjoicG9wdXAiLCJjcmVkZW50aWFsVG9rZW4iOiJYNkNHQnRBWGJTdXRiclAwQjgwMWd0VmtlRmU4ZjYybnU3M0NnaUNXdWxEIiwiaXNDb3Jkb3ZhIjpmYWxzZX0%253D
-	// &access_type=online
-	// &approval_prompt=auto
+
 	var loginUrl =
 		config.hmisAPIEndpoints.oauthBaseUrl + config.hmisAPIEndpoints.authorize +
 		'?access_type=online' +

@@ -5,23 +5,25 @@ HMIS = {};
 
 OAuth.registerService('HMIS', 2, null, function(query) {
 
+	console.log(query);
+
 	var response = getTokenResponse(query);
 	var accessToken = response.accessToken;
 
-	// var identity = getIdentity(accessToken, whitelisted);
+	var identity = getIdentity(accessToken);
+
+	console.log(identity)
 
 	var serviceData = {
 		accessToken: accessToken,
 		expiresAt: (+new Date) + (1000 * response.expiresIn)
 	};
 
-
-	// var fields = _.pick(identity, whitelisted);
-	// _.extend(serviceData, fields);
+	console.log(serviceData);
 
 	return {
 		serviceData: serviceData,
-		options: {profile: {name: "User Name"}}
+		options: {profile: identity}
 	};
 });
 
@@ -89,7 +91,7 @@ var getTokenResponse = function (query) {
 	};
 };
 
-var getIdentity = function (accessToken, fields) {
+var getIdentity = function (accessToken) {
 	var config = ServiceConfiguration.configurations.findOne({service: 'HMIS'});
 	if (!config)
 		throw new ServiceConfiguration.ConfigError();
