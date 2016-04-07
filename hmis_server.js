@@ -5,21 +5,29 @@ HMIS = {};
 
 OAuth.registerService('HMIS', 2, null, function(query) {
 
-	console.log(query);
-
 	var response = getTokenResponse(query);
 	var accessToken = response.accessToken;
 
-	var identity = getIdentity(accessToken);
+	var whitelisted = ['accountId', 'emailAddress', 'firstName', 'lastName'];
 
-	console.log(identity)
+	var identity = getIdentity(accessToken);
+	identity.name = identity.account.firstName.trim() + " " + identity.account.lastName.trim();
 
 	var serviceData = {
 		accessToken: accessToken,
 		expiresAt: (+new Date) + (1000 * response.expiresIn)
 	};
 
-	console.log(serviceData);
+
+	var fields = _.pick(identity.account, whitelisted);
+	fields.id = fields.accountId;
+	fields.name = identity.account.firstName.trim() + " " + identity.account.lastName.trim();
+	fields.firstName = fields.firstName.trim();
+	fields.lastName = fields.lastName.trim();
+	fields.first_name = fields.firstName;
+	fields.last_name = fields.lastName;
+	fields.email = fields.emailAddress;
+	_.extend(serviceData, fields);
 
 	return {
 		serviceData: serviceData,
@@ -77,7 +85,6 @@ var getTokenResponse = function (query) {
 	// Success!  Extract the hmis access token and expiration
 	// time from the response
 	var parsedResponse = JSON.parse(responseContent);
-	console.log(parsedResponse);
 	var hmisAccessToken = parsedResponse.oAuthAuthorization.accessToken;
 	var hmisExpires = parsedResponse.oAuthAuthorization.expiresIn;
 
@@ -116,8 +123,5 @@ var getIdentity = function (accessToken) {
 };
 
 HMIS.retrieveCredential = function(credentialToken, credentialSecret) {
-	console.log("hmis::retrieveCredential");
-	console.log(credentialToken);
-	console.log(credentialSecret);
 	return OAuth.retrieveCredential(credentialToken, credentialSecret);
 };
