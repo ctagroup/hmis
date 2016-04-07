@@ -55,11 +55,17 @@ var getTokenResponse = function (query) {
 
 	var responseContent;
 	try {
+		var code;
+		if(query['close?code']) {
+			code = query['close?code'];
+		} else {
+			code = query['code'];
+		}
 		// Request an access token
 		responseContent = HTTP.post(
 			config.hmisAPIEndpoints.oauthBaseUrl + config.hmisAPIEndpoints.token +
 			"?grant_type=authorization_code" +
-			"&code=" + query["close?code"] +
+			"&code=" + code +
 			"&redirect_uri=" + OAuth._redirectUri('HMIS', config), {
 				headers: {
 					"X-HMIS-TrustedApp-Id": config.appId,
