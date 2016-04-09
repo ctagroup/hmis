@@ -15,7 +15,8 @@ OAuth.registerService('HMIS', 2, null, function(query) {
 
 	var serviceData = {
 		accessToken: accessToken,
-		expiresAt: (+new Date) + (1000 * response.expiresIn)
+		expiresAt: (+new Date) + (1000 * response.expiresIn),
+		refreshToken: response.refreshToken
 	};
 
 
@@ -93,6 +94,7 @@ var getTokenResponse = function (query) {
 	var parsedResponse = JSON.parse(responseContent);
 	var hmisAccessToken = parsedResponse.oAuthAuthorization.accessToken;
 	var hmisExpires = parsedResponse.oAuthAuthorization.expiresIn;
+	var hmisRefreshToken = parsedResponse.oAuthAuthorization.refreshToken;
 
 	if (!hmisAccessToken) {
 		throw new Error("Failed to complete OAuth handshake with hmis " +
@@ -100,7 +102,8 @@ var getTokenResponse = function (query) {
 	}
 	return {
 		accessToken: hmisAccessToken,
-		expiresIn: hmisExpires
+		expiresIn: hmisExpires,
+		refreshToken: hmisRefreshToken
 	};
 };
 
