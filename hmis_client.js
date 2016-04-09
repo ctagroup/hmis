@@ -36,7 +36,7 @@ HMIS.requestCredential = function (options, credentialRequestCompleteCallback) {
 
 	var loginUrl =
 		config.hmisAPIEndpoints.oauthBaseUrl + config.hmisAPIEndpoints.authorize +
-		'?access_type=online' +
+		'?access_type=offline' +
 		'&approval_prompt=auto' +
 		'&trustedApp_id=' + config.appId +
 		'&response_type=code' +
