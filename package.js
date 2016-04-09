@@ -6,7 +6,7 @@ Package.describe(
 		name: "desaiuditd:hmis",
 		summary: "HMIS OAuth flow",
 		version: "0.0.7",
-		git: "https://github.com/desaiuditd/hmis",
+		git: "https://github.com/ctagroup/hmis",
 	}
 );
 
