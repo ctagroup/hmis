@@ -8,7 +8,7 @@ OAuth.registerService('HMIS', 2, null, function(query) {
 	var response = getTokenResponse(query);
 	var accessToken = response.accessToken;
 
-	var whitelisted = ['accountId', 'emailAddress', 'firstName', 'lastName'];
+	var whitelisted = ['accountId', 'emailAddress', 'firstName', 'lastName', 'roles'];
 
 	var identity = getIdentity(accessToken);
 	identity.name = identity.account.firstName.trim() + " " + identity.account.lastName.trim();
@@ -28,6 +28,7 @@ OAuth.registerService('HMIS', 2, null, function(query) {
 	fields.first_name = fields.firstName;
 	fields.last_name = fields.lastName;
 	fields.email = fields.emailAddress;
+	fields.roles = fields.roles;
 	_.extend(serviceData, fields);
 
 	return {
