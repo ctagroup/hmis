@@ -28,7 +28,7 @@ OAuth.registerService('HMIS', 2, null, function(query) {
 	fields.first_name = fields.firstName;
 	fields.last_name = fields.lastName;
 	fields.email = fields.emailAddress;
-	fields.roles = fields.roles;
+	fields.roles = fields.roles.role;
 	_.extend(serviceData, fields);
 
 	return {
